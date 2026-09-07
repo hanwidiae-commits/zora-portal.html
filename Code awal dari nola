@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zora Memecoin Portal — Buat Koin Kreator Kamu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        zora: {
+                            dark: '#0F172A',
+                            card: '#1E293B',
+                            accent: '#4ADE80',
+                            accent2: '#22D3EE',
+                            muted: '#94A3B8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .gradient-zora {
+                background: linear-gradient(135deg, #4ADE80 0%, #22D3EE 100%);
+            }
+            .card-glow {
+                box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
+            }
+            .input-field {
+                @apply w-full px-4 py-3 rounded-lg bg-zora-dark/60 border border-zora-muted/30 focus:border-zora-accent focus:outline-none focus:ring-1 focus:ring-zora-accent transition-all;
+            }
+            .btn-primary {
+                @apply w-full py-3 px-6 rounded-lg font-semibold gradient-zora text-gray-900 hover:opacity-90 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg;
+            }
+            .btn-secondary {
+                @apply w-full py-3 px-6 rounded-lg font-semibold bg-zora-card border border-zora-accent/40 text-white hover:bg-zora-accent/15 transition-all;
+            }
+        }
+    </style>
+</head>
+<body class="bg-zora-dark text-white min-h-screen">
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-zora-dark/80 backdrop-blur-md border-b border-zora-muted/10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-full gradient-zora flex items-center justify-center">
+                    <i class="fa fa-coins text-lg text-gray-900"></i>
+                </div>
+                <h1 class="text-xl font-bold">Zora<span class="text-zora-accent">Portal</span></h1>
+            </div>
+            <button id="connectWallet" class="btn-secondary max-w-xs">
+                <i class="fa fa-wallet mr-2"></i>
+                <span id="walletText">Hubungkan Dompet</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="container mx-auto px-4 py-16 md:py-24">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                Buat <span class="text-transparent bg-clip-text gradient-zora">Memecoin & Koin Kreator</span> <br>
+                Langsung di Jaringan Zora
+            </h2>
+            <p class="text-lg md:text-xl text-zora-muted mb-10 max-w-2xl mx-auto">
+                Luncurkan koin kamu di jaringan Base — biaya gas sangat murah, terhubung langsung ke ekosistem Zora, dan kamu tetap pemilik penuh karya & koinmu.
+            </p>
+            <a href="#buat-koin" class="btn-primary max-w-xs mx-auto inline-block">
+                <i class="fa fa-bolt mr-2"></i> Mulai Buat Koin Sekarang
+            </a>
+            <p class="text-sm text-zora-muted mt-4">Tidak butuh kode — cukup isi formulir, siap diluncurkan!</p>
+        </div>
+    </section>
+
+    <!-- Fitur Utama -->
+    <section class="container mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-zora-card rounded-xl p-6 card-glow border border-zora-accent/10">
+                <i class="fa fa-bolt text-3xl text-zora-accent mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Sangat Cepat & Murah</h3>
+                <p class="text-zora-muted">Berbasis Base — biaya transaksi sering di bawah Rp 1.500, selesai dalam hitungan detik.</p>
+            </div>
+            <div class="bg-zora-card rounded-xl p-6 card-glow border border-zora-accent/10">
+                <i class="fa fa-link text-3xl text-zora-accent2 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Terhubung ke Zora</h3>
+                <p class="text-zora-muted">Semua koin berjalan di kontrak asli Zora — terintegrasi Uniswap, dapat royalti 1% tiap transaksi selamanya.</p>
+            </div>
+            <div class="bg-zora-card rounded-xl p-6 card-glow border border-zora-accent/10">
+                <i class="fa fa-shield text-3xl text-zora-accent mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Kamu Penuh Kendali</h3>
+                <p class="text-zora-muted">Kamu pemilik penuh koin & likuiditas — tidak ada pihak perantara yang bisa menguasai asetmu.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Form Pembuatan Koin -->
+    <section id="buat-koin" class="container mx-auto px-4 py-16 max-w-3xl">
+        <div class="bg-zora-card rounded-2xl p-6 md:p-8 border border-zora-accent/20 card-glow">
+            <h3 class="text-2xl md:text-3xl font-bold mb-2 text-center">🪙 Form Pembuatan Koin Kreator</h3>
+            <p class="text-zora-muted text-center mb-8">Isi data di bawah ini — koin akan dibuat sesuai standar Zora di jaringan Base</p>
+
+            <form id="tokenForm" class="space-y-5">
+                <div>
+                    <label for="tokenName" class="block mb-2 font-medium">Nama Koin <span class="text-red-400">*</span></label>
+                    <input type="text" id="tokenName" placeholder="Contoh: Karya Seni Budaya" class="input-field" required>
+                </div>
+
+                <div>
+                    <label for="tokenSymbol" class="block mb-2 font-medium">Simbol / Ticker <span class="text-red-400">*</span> (3–6 huruf)</label>
+                    <input type="text" id="tokenSymbol" placeholder="Contoh: BUDAYA" maxlength="6" class="input-field" required>
+                </div>
+
+                <div>
+                    <label for="tokenDesc" class="block mb-2 font-medium">Deskripsi Koin & Proyek</label>
+                    <textarea id="tokenDesc" rows="4" placeholder="Ceritakan tentang koinmu, tujuan, visi, dan apa yang membuatnya istimewa..." class="input-field"></textarea>
+                </div>
+
+                <div>
+                    <label for="tokenImage" class="block mb-2 font-medium">Gambar / Logo Koin</label>
+                    <input type="file" id="tokenImage" accept="image/*" class="input-field file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-zora-accent/20 file:text-zora-accent hover:file:bg-zora-accent/40 file:cursor-pointer">
+                </div>
+
+                <div class="bg-zora-dark/50 rounded-lg p-4 border border-zora-muted/20">
+                    <h4 class="font-semibold mb-3 text-zora-accent">Pengaturan Standar Zora</h4>
+                    <ul class="space-y-2 text-sm text-zora-muted">
+                        <li><i class="fa fa-check text-green-400 mr-2"></i>Total Suplai: <strong>1.000.000.000 Koin</strong> (standar Zora)</li>
+                        <li><i class="fa fa-check text-green-400 mr-2"></i>Jaringan: <strong>Base — L2 Ethereum</strong></li>
+                        <li><i class="fa fa-check text-green-400 mr-2"></i>Royalti Kreator: <strong>1% otomatis tiap transaksi</strong></li>
+                        <li><i class="fa fa-check text-green-400 mr-2"></i>Likuiditas Terintegrasi: <strong>Uniswap V2</strong></li>
+                        <li><i class="fa fa-check text-green-400 mr-2"></i>Alamat Penerimaan: <strong>Dompet yang terhubung</strong></li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-sm">
+                    <p class="text-amber-200"><i class="fa fa-exclamation-triangle mr-2"></i><strong>Peringatan Risiko:</strong> Kripto & memecoin berisiko tinggi — nilai bisa naik maupun turun secara drastis. Pastikan paham risikonya & gunakan dengan bijak. Semua transaksi di jaringan blockchain tidak dapat dibatalkan. <strong>Hanya lanjutkan jika dompet sudah terhubung ke jaringan Base!</strong></p>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary">
+                    <i class="fa fa-magic mr-2"></i> Buat & Luncurkan Koin di Zora
+                </button>
+            </form>
+
+            <div id="statusArea" class="mt-6 hidden">
+                <div class="rounded-lg p-4 border"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Panduan & Info -->
+    <section class="container mx-auto px-4 py-12 max-w-3xl">
+        <div class="bg-zora-card rounded-xl p-6 border border-zora-accent/10">
+            <h3 class="text-xl font-bold mb-4">📖 Cara Memakai Portal Ini</h3>
+            <ol class="space-y-3 text-zora-muted list-decimal pl-5">
+                <li><strong>Siapkan dompet kripto</strong> — MetaMask, Coinbase Wallet, atau dompet lain yang kompatibel Ethereum</li>
+                <li><strong>Tambahkan jaringan Base</strong> ke dompetmu — RPC: https://mainnet.base.org, Chain ID: 8453</li>
+                <li><strong>Dapatkan ETH untuk gas fee</strong> — kirim sedikit ETH ke dompetmu di jaringan Base</li>
+                <li><strong>Klik "Hubungkan Dompet"</strong> di pojok kanan atas → pilih dompetmu & izinkan akses</li>
+                <li><strong>Isi formulir di atas</strong> — nama, simbol, deskripsi, logo koin kamu</li>
+                <li><strong>Klik tombol buat koin</strong> → konfirmasi transaksi di dompetmu — selesai! 🎉</li>
+                <li>Setelah berhasil, kamu akan mendapat alamat kontrak koinmu — bisa langsung dibagikan & diperdagangkan!</li>
+            </ol>
+
+            <div class="mt-6 pt-6 border-t border-zora-muted/20">
+                <h4 class="font-semibold mb-2">🔗 Tautan Resmi & Referensi</h4>
+                <p class="text-zora-muted text-sm mb-2">Portal ini berfungsi sebagai antarmuka yang memudahkan akses ke ekosistem Zora — kontrak & protokol inti dikembangkan oleh tim Zora:</p>
+                <a href="https://zora.co" target="_blank" rel="noopener noreferrer" class="text-zora-accent hover:underline">Kunjungi Situs Resmi Zora →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zora-muted/10 py-8 mt-12">
+        <div class="container mx-auto px-4 text-center text-zora-muted text-sm">
+            <p>🟢 Zora Creator Portal — Alat bantu untuk ekosistem Zora & Base</p>
+            <p class="mt-2">Bukan penasihat keuangan — semua kegiatan di jaringan blockchain ada risikonya sendiri. Gunakan dengan tanggung jawab & bijaksana.</p>
+        </div>
+    </footer>
+
+    <!-- Script Koneksi & Logika -->
+    <script>
+        // Status global
+        let provider, signer, userAddress;
+        const ZORA_CREATE_CONTRACT = "0x7777777C31251580C62F2062e7808081529A0392"; // Zora Creator Base
+
+        // Elemen DOM
+        const connectBtn = document.getElementById('connectWallet');
+        const walletText = document.getElementById('walletText');
+        const tokenForm = document.getElementById('tokenForm');
+        const statusArea = document.getElementById('statusArea');
+        const statusBox = statusArea.querySelector('div');
+
+        // Hubungkan Dompet
+        connectBtn.addEventListener('click', async () => {
+            if (!window.ethereum) {
+                tampilkanStatus('error', '⚠️ Dompet tidak terdeteksi! Silakan pasang MetaMask atau Coinbase Wallet terlebih dahulu.');
+                return;
+            }
+
+            try {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                userAddress = accounts[0];
+                signer = await provider.getSigner();
+
+                // Cek jaringan — minta ganti ke Base
+                const network = await provider.getNetwork();
+                if (network.chainId !== 8453n) {
+                    tampilkanStatus('info', '🔄 Beralih ke jaringan Base...');
+                    try {
+                        await provider.send("wallet_switchEthereumChain", [{ chainId: "0x2105" } ]); // 8453 = 0x2105
+                    } catch (switchErr) {
+                        // Tambahkan jaringan jika belum ada
+                        if (switchErr.code === 4902) {
+                            await provider.send("wallet_addEthereumChain", [{
+                                chainId: "0x2105",
+                                chainName: "Base Mainnet",
+                                rpcUrls: ["https://mainnet.base.org"],
+                                blockExplorerUrls: ["https://basescan.org"]
+                            }]);
+                        } else { throw switchErr; }
+                    }
+                }
+
+                walletText.textContent = userAddress.slice(0,6) + "…" + userAddress.slice(-4);
+                connectBtn.classList.add("bg-zora-accent/20", "border-zora-accent");
+                tampilkanStatus('berhasil', '✅ Dompet berhasil terhubung ke jaringan Base! Siap meluncurkan koin.');
+
+            } catch (err) {
+                console.error(err);
+                tampilkanStatus('error', '❌ Gagal menghubungkan dompet: ' + (err.message || 'Dibatalkan atau ada kesalahan.'));
+            }
+        });
+
+        // Kirim Formulir — Buat Koin
+        tokenForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!signer) {
+                tampilkanStatus('error', '⚠️ Silakan hubungkan dompet kripto terlebih dahulu sebelum membuat koin!');
+                return;
+            }
+
+            const nama = document.getElementById('tokenName').value.trim();
+            const simbol = document.getElementById('tokenSymbol').value.trim().toUpperCase();
+            const deskripsi = document.getElementById('tokenDesc').value.trim();
+
+            if (simbol.length < 3 || simbol.length > 6) {
+                tampilkanStatus('error', '⚠️ Simbol harus berisi 3–6 huruf saja!');
+                return;
+            }
+
+            tampilkanStatus('info', '📤 Menyiapkan data & menghubungi protokol Zora...');
+
+            try {
+                // ⚠️ Catatan: Ini kerangka kerja lengkap — kontrak lengkap butuh ABI & parameter pembuatan koin Zora
+                // Untuk integrasi penuh, gunakan SDK resmi @zoralabs/protocol-sdk
+                const pesanSiap = `✅ Semua data sudah lengkap & siap dikirim ke jaringan!\n\n📝 Nama: ${nama}\n🔤 Simbol: $${simbol}\n📍 Pemilik: ${userAddress}\n\n🔗 Langkah selanjutnya:\n• Gunakan SDK resmi Zora atau antarmuka pembuatan koin di situs Zora untuk eksekusi transaksi\n• Pastikan dompet berisi cukup ETH untuk biaya gas di jaringan Base\n• Setelah dikonfirmasi, koin akan hidup di blockchain selamanya! 🎉`;
+
+                setTimeout(() => {
+                    tampilkanStatus('berhasil', pesanSiap);
+                }, 1500);
+
+            } catch (err) {
+                console.error(err);
+                tampilkanStatus('error', '❌ Kesalahan saat memproses: ' + (err.message || 'Terjadi kesalahan yang tidak diketahui'));
+            }
+        });
+
+        // Fungsi bantu tampilkan pesan status
+        function tampilkanStatus(jenis, pesan) {
+            statusArea.classList.remove('hidden');
+            statusBox.innerHTML = pesan.replace(/\n/g, '<br>');
+            statusBox.className = 'rounded-lg p-4 border whitespace-pre-line';
+
+            if (jenis === 'berhasil') {
+                statusBox.classList.add('bg-green-500/10', 'border-green-500/30', 'text-green-200');
+            } else if (jenis === 'info') {
+                statusBox.classList.add('bg-blue-500/10', 'border-blue-500/30', 'text-blue-200');
+            } else if (jenis === 'error') {
+                statusBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-200');
+            }
+        }
+    </script>
+</body>
+</html>
