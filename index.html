@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HANWIDIAE DEPLOY — Multi Chain · Multi Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hw: {
+                            bg: '#0F0B24',
+                            card: '#1A143D',
+                            cardHover: '#241B52',
+                            border: '#4B3F8C',
+                            purple: '#9D4EDD',
+                            purpleDark: '#7B2CBF',
+                            blue: '#4895EF',
+                            accent: '#E0AAFF',
+                            muted: '#A8A3C6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'glow': '0 0 25px rgba(157, 78, 221, 0.25)',
+                        'glow-strong': '0 0 35px rgba(157, 78, 221, 0.4)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .gradient-bg {
+                background: linear-gradient(135deg, #0F0B24 0%, #1A143D 50%, #0F0B24 100%);
+            }
+            .btn-purple {
+                background: linear-gradient(135deg, #9D4EDD 0%, #7B2CBF 100%);
+            }
+            .btn-purple:hover {
+                background: linear-gradient(135deg, #B761FF 0%, #9234D8 100%);
+            }
+            .card-border {
+                border: 1px solid rgba(157, 78, 221, 0.35);
+            }
+            .input-field {
+                @apply w-full px-4 py-3 rounded-xl bg-hw-bg/60 border border-hw-border/50 focus:border-hw-purple focus:outline-none transition-all text-white placeholder-hw-muted;
+            }
+            .input-box {
+                @apply w-full px-5 py-4 rounded-xl bg-hw-bg/50 border border-hw-border/40 focus:border-hw-purple focus:outline-none transition-all text-white placeholder-hw-muted text-lg;
+            }
+            .option-card {
+                @apply rounded-xl border-2 border-transparent bg-hw-card py-4 px-5 cursor-pointer transition-all duration-200;
+            }
+            .option-card.active {
+                @apply border-hw-purple bg-hw-purple/10 shadow-glow;
+            }
+            .market-cap-btn {
+                @apply px-4 py-2 rounded-lg bg-hw-bg border border-hw-border/40 text-hw-muted hover:border-hw-purple hover:text-white transition-all;
+            }
+            .market-cap-btn.active {
+                @apply bg-hw-purple text-white border-hw-purple shadow-glow;
+            }
+        }
+        body {
+            background: radial-gradient(circle at top center, #2A1F5C 0%, #0F0B24 60%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-white font-sans">
+    <!-- Navbar -->
+    <nav class="px-4 py-5 flex justify-between items-center max-w-4xl mx-auto">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl btn-purple flex items-center justify-center shadow-glow">
+                <i class="fa-solid fa-hexagon-nodes text-xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold">HANWIDIAE DEPLOY</h1>
+                <p class="text-sm text-hw-muted">Multi Chain · Multi Protocol</p>
+            </div>
+        </div>
+        <button id="connectWallet" class="btn-purple px-5 py-3 rounded-xl font-semibold shadow-glow whitespace-nowrap">
+            <i class="fa-solid fa-wallet mr-2"></i>
+            <span id="walletText">Connect Wallet</span>
+        </button>
+    </nav>
+
+    <!-- Tabs Navigation -->
+    <div class="max-w-4xl mx-auto px-4 pt-4">
+        <div class="flex items-center gap-1 overflow-x-auto pb-2">
+            <button class="bg-hw-purple/20 text-hw-accent px-4 py-2 rounded-lg font-semibold border border-hw-purple/40 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-bolt"></i> Zora
+            </button>
+            <button class="text-hw-muted hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-link"></i> Clanker
+            </button>
+            <button class="text-hw-muted hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-clock-rotate-left"></i> History
+            </button>
+            <button class="text-hw-muted hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-trend-up"></i> Trending
+            </button>
+            <button class="text-hw-muted hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-send"></i> Multisend
+            </button>
+            <button class="text-hw-muted hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-right-left"></i> Swap
+            </button>
+        </div>
+
+        <!-- Sub Tabs -->
+        <div class="flex gap-4 mt-4 mb-8">
+            <button class="btn-purple px-6 py-3 rounded-xl font-semibold shadow-glow flex items-center gap-2">
+                <i class="fa-solid fa-rocket"></i> Deploy
+            </button>
+            <button class="px-6 py-3 rounded-xl font-semibold text-hw-muted border border-hw-border/40 flex items-center gap-2 hover:border-hw-purple/50 transition-all">
+                <i class="fa-solid fa-gift"></i> Claim Vesting
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <main class="max-w-4xl mx-auto px-4 pb-16 space-y-6">
+        <!-- Upload Logo & Info -->
+        <div class="bg-hw-card/60 rounded-2xl p-6 card-border shadow-lg">
+            <label class="block mb-3 font-medium text-lg">Upload logo</label>
+            <div class="border-2 border-dashed border-hw-border/50 rounded-xl p-5 flex items-center justify-between mb-6 hover:border-hw-purple/60 transition-all cursor-pointer">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-lg bg-hw-bg/80 flex items-center justify-center text-hw-muted">
+                        <i class="fa-solid fa-image text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-hw-muted">PNG or JPG · optional</p>
+                    </div>
+                </div>
+                <span class="text-hw-accent font-semibold">BROWSE</span>
+            </div>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block mb-2 font-medium">NAME</label>
+                    <input type="text" id="coinName" placeholder="My Awesome Coin" class="input-box">
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-medium">TICKER</label>
+                    <div class="relative">
+                        <input type="text" id="coinTicker" placeholder="e.g. MAC · BASE COIN" maxlength="24" class="input-box pr-16">
+                        <span class="absolute right-5 top-1/2 -translate-y-1/2 text-hw-muted text-sm">0/24</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-medium">DESCRIPTION</label>
+                    <textarea id="coinDesc" rows="3" placeholder="What is this coin about?" class="input-box resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coin Type Selection -->
+        <div class="bg-hw-card/60 rounded-2xl p-6 card-border shadow-lg">
+            <h3 class="block mb-4 font-medium text-lg">COIN TYPE</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="optContentCoin" class="option-card active" onclick="selectCoinType('content')">
+                    <h4 class="font-bold text-lg">Content Coin</h4>
+                    <p class="text-sm text-hw-muted mt-1">10M directly to you, 990M to LP</p>
+                </div>
+                <div id="optCreatorCoin" class="option-card" onclick="selectCoinType('creator')">
+                    <h4 class="font-bold text-lg">Creator Coin</h4>
+                    <p class="text-sm text-hw-muted mt-1">500M to LP, 500M vesting 5 years</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair Currency -->
+        <div class="bg-hw-card/60 rounded-2xl p-6 card-border shadow-lg">
+            <h3 class="block mb-4 font-medium text-lg flex items-center gap-2">
+                <i class="fa-solid fa-flask text-hw-purple"></i> PAIR CURRENCY
+            </h3>
+            <div class="space-y-3">
+                <div id="pairZora" class="option-card active flex items-center gap-4" onclick="selectPair('zora')">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                        <i class="fa-solid fa-globe text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">ZORA</h4>
+                        <p class="text-sm text-hw-muted">Pair with Zora token</p>
+                    </div>
+                    <div class="w-3 h-3 rounded-full bg-hw-purple"></div>
+                </div>
+
+                <div id="pairWeth" class="option-card flex items-center gap-4" onclick="selectPair('weth')">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <i class="fa-brands fa-ethereum text-blue-400 text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">WETH</h4>
+                        <p class="text-sm text-hw-muted">Wrapped Ethereum</p>
+                    </div>
+                    <div class="w-3 h-3 rounded-full border border-hw-muted"></div>
+                </div>
+
+                <div id="pairUSDC" class="option-card flex items-center gap-4" onclick="selectPair('usdc')">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <i class="fa-solid fa-dollar-sign text-blue-400 text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">USDC</h4>
+                        <p class="text-sm text-hw-muted">USD Coin</p>
+                    </div>
+                    <div class="w-3 h-3 rounded-full border border-hw-muted"></div>
+                </div>
+
+                <div id="pairCustom" class="option-card flex items-center gap-4" onclick="selectPair('custom')">
+                    <div class="w-9 h-9 rounded-full bg-hw-muted/20 flex items-center justify-center">
+                        <i class="fa-solid fa-user text-hw-muted text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg">Custom Token</h4>
+                        <p class="text-sm text-hw-muted">Pair with any Base token by CA</p>
+                    </div>
+                    <div class="w-3 h-3 rounded-full border border-hw-muted"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Target Market Cap -->
+        <div class="bg-hw-card/60 rounded-2xl p-6 card-border shadow-lg">
+            <h3 class="block mb-4 font-medium text-lg">TARGET MARKET CAP</h3>
+            <div class="flex flex-wrap gap-3 mb-4">
+                <button class="market-cap-btn active" data-cap="50" onclick="selectMarketCap(50)">50</button>
+                <button class="market-cap-btn" data-cap="100" onclick="selectMarketCap(100)">100</button>
+                <button class="market-cap-btn" data-cap="250" onclick="selectMarketCap(250)">250</button>
+                <button class="market-cap-btn" data-cap="1000" onclick="selectMarketCap(1000)">1k</button>
+                <button class="market-cap-btn" data-cap="5000" onclick="selectMarketCap(5000)">5k</button>
+            </div>
+            <input type="text" id="customCap" placeholder="Custom" class="input-box">
+            <p class="text-sm text-hw-muted mt-3">Pair price is fetched live from CoinGecko just before deploy for an accurate target market cap.</p>
+        </div>
+
+        <!-- Buy On Deploy -->
+        <div class="bg-hw-card/60 rounded-2xl p-6 card-border shadow-lg">
+            <h3 class="block mb-4 font-medium text-lg flex items-center justify-between">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-bolt text-hw-purple"></i> BUY ON DEPLOY</span>
+                <span class="text-sm text-hw-muted font-normal">Optional · same tx</span>
+            </h3>
+            <div class="relative">
+                <input type="text" id="buyAmount" placeholder="0.0" class="input-box pr-16">
+                <span class="absolute right-5 top-1/2 -translate-y-1/2 text-hw-muted font-medium">ETH</span>
+            </div>
+            <p class="text-sm text-hw-muted mt-3">Leave empty to skip buying</p>
+        </div>
+
+        <!-- Network Info & Deploy Button -->
+        <div class="space-y-4">
+            <div class="text-center text-hw-muted font-medium">
+                <p>BASE NETWORK · ZORA PROTOCOL</p>
+            </div>
+
+            <button id="deployBtn" class="w-full py-5 rounded-2xl btn-purple text-xl font-bold shadow-glow-strong transition-all hover:shadow-glow-strong hover:scale-[1.02] active:scale-[0.98]">
+                <i class="fa-solid fa-rocket mr-2"></i> Deploy Token
+            </button>
+
+            <p class="text-sm text-hw-muted text-center">
+                HANWIDIAE DEPLOY — Multi Chain · Multi Protocol Platform
+            </p>
+        </div>
+    </main>
+
+    <!-- Status Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-hw-card rounded-2xl p-6 max-w-md w-full mx-4 card-border shadow-glow-strong">
+            <p id="statusText" class="text-center text-lg"></p>
+            <button onclick="closeModal()" class="mt-6 w-full py-3 rounded-xl bg-hw-purple font-semibold">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        let provider, signer, userAddress;
+        let selectedCoinType = 'content';
+        let selectedPair = 'zora';
+        let selectedMarketCap = 50;
+
+        // Connect Wallet
+        document.getElementById('connectWallet').addEventListener('click', async () => {
+            if (!window.ethereum) {
+                showStatus('⚠️ Dompet tidak terdeteksi! Pasang MetaMask / Coinbase Wallet dulu.');
+                return;
+            }
+            try {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send('eth_requestAccounts', []);
+                userAddress = accounts[0];
+                signer = await provider.getSigner();
+
+                const network = await provider.getNetwork();
+                if (network.chainId !== 8453n) {
+                    showStatus('🔄 Beralih ke jaringan Base…');
+                    try {
+                        await provider.send('wallet_switchEthereumChain', [{ chainId: '0x2105' }]);
+                    } catch (e) {
+                        if (e.code === 4902) {
+                            await provider.send('wallet_addEthereumChain', [{
+                                chainId: '0x2105', chainName: 'Base Mainnet',
+                                rpcUrls: ['https://mainnet.base.org'], blockExplorerUrls: ['https://basescan.org']
+                            }]);
+                        } else throw e;
+                    }
+                }
+
+                document.getElementById('walletText').textContent = userAddress.slice(0,6)+'…'+userAddress.slice(-4);
+                document.getElementById('connectWallet').classList.add('shadow-glow-strong');
+                showStatus('✅ Dompet terhubung ke Base! Siap meluncurkan token di HANWIDIAE DEPLOY.');
+            } catch (err) {
+                showStatus('❌ Gagal hubungkan dompet: ' + (err.message || 'Dibatalkan'));
+            }
+        });
+
+        // Coin Type Selection
+        function selectCoinType(type) {
+            selectedCoinType = type;
+            document.getElementById('optContentCoin').classList.toggle('active', type === 'content');
+            document.getElementById('optCreatorCoin').classList.toggle('active', type === 'creator');
+        }
+
+        // Pair Currency Selection
+        function selectPair(pair) {
+            selectedPair = pair;
+            ['zora','weth','usdc','custom'].forEach(p => {
+                const el = document.getElementById(`pair${p.charAt(0).toUpperCase()+p.slice(1)}`);
+                el.classList.toggle('active', p === pair);
+                el.querySelector('.w-3').classList.toggle('bg-hw-purple', p === pair);
+                el.querySelector('.w-3').classList.toggle('border', p !== pair);
+            });
+        }
+
+        // Market Cap Selection
+        function selectMarketCap(cap) {
+            selectedMarketCap = cap;
+            document.querySelectorAll('.market-cap-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.cap) === cap);
+            });
+        }
+
+        // Deploy Token
+        document.getElementById('deployBtn').addEventListener('click', async () => {
+            if (!signer) { showStatus('⚠️ Hubungkan dompet dulu!'); return; }
+            const name = document.getElementById('coinName').value.trim();
+            const symbol = document.getElementById('coinTicker').value.trim().toUpperCase();
+            if (!name || !symbol) { showStatus('⚠️ Isi Nama & Ticker token dulu!'); return; }
+            showStatus(`📤 Menyiapkan peluncuran token…\n\n📝 Nama: ${name}\n🔤 Simbol: $${symbol}\n📦 Jenis: ${selectedCoinType === 'content' ? 'Content Coin' : 'Creator Coin'}\n💰 Pasangan: ${selectedPair.toUpperCase()}\n📊 Target Kap: $${selectedMarketCap}k\n\n✅ Siap dikirim lewat HANWIDIAE DEPLOY ke jaringan Base! Konfirmasi transaksi di dompetmu.`);
+        });
+
+        function showStatus(text) {
+            document.getElementById('statusText').innerText = text;
+            document.getElementById('statusModal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('statusModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
